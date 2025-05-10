@@ -72,10 +72,10 @@
     </style>
 </head>
 <body>
-    <button class="dark-mode-toggle" onclick="toggleDarkMode()" aria-label="Toggle Dark Mode">🌙 Dark Mode</button>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌙 Dark Mode</button>
 
     <h1>QR Code Generator</h1>
-    
+
     <label for="qrType">Select QR Code Type:</label>
     <select id="qrType" onchange="updateInputFields()">
         <option value="text" selected>Text/URL</option>
@@ -85,14 +85,15 @@
     </select>
 
     <div id="inputFields">
-        <input type="text" id="qrData" placeholder="Enter text or URL" aria-label="QR Data">
+        <input type="text" id="qrData" placeholder="Enter text or URL">
     </div>
 
-    <button onclick="generateQRCode()" aria-label="Generate QR Code">Generate QR Code</button>
-    
-    <canvas id="qrcode"></canvas>
+    <button onclick="generateQRCode()">Generate QR Code</button>
+
+    <div id="qrcode"></div>
     <a id="downloadLink" style="display: none; margin-top: 20px;">Download QR Code</a>
 
+    <!-- Include QR Code Generator library from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <script>
         function updateInputFields() {
@@ -101,32 +102,30 @@
 
             if (qrType === "wifi") {
                 inputFields.innerHTML = `
-                    <input type="text" id="ssid" placeholder="Enter SSID" aria-label="WiFi SSID">
-                    <input type="password" id="password" placeholder="Enter Password" aria-label="WiFi Password">
+                    <input type="text" id="ssid" placeholder="Enter SSID">
+                    <input type="password" id="password" placeholder="Enter Password">
                     <label>
                         <input type="checkbox" onclick="togglePassword()"> Show Password
                     </label>
                 `;
             } else if (qrType === "email") {
                 inputFields.innerHTML = `
-                    <input type="email" id="qrData" placeholder="Enter email address" aria-label="Email">
+                    <input type="email" id="qrData" placeholder="Enter email address">
                 `;
             } else if (qrType === "phone") {
                 inputFields.innerHTML = `
-                    <input type="tel" id="qrData" placeholder="Enter phone number" aria-label="Phone Number">
+                    <input type="tel" id="qrData" placeholder="Enter phone number">
                 `;
             } else {
                 inputFields.innerHTML = `
-                    <input type="text" id="qrData" placeholder="Enter text or URL" aria-label="Text or URL">
+                    <input type="text" id="qrData" placeholder="Enter text or URL">
                 `;
             }
         }
 
         function togglePassword() {
             const passwordField = document.getElementById("password");
-            if (passwordField) {
-                passwordField.type = passwordField.type === "password" ? "text" : "password";
-            }
+            passwordField.type = passwordField.type === "password" ? "text" : "password";
         }
 
         function generateQRCode() {
@@ -136,10 +135,6 @@
             if (qrType === "wifi") {
                 const ssid = document.getElementById("ssid").value;
                 const password = document.getElementById("password").value;
-                if (!ssid || !password) {
-                    alert("Please enter both SSID and Password for WiFi QR code!");
-                    return;
-                }
                 qrData = `WIFI:S:${ssid};T:WPA;P:${password};;`;
             } else {
                 qrData = document.getElementById("qrData").value.trim();
@@ -156,32 +151,25 @@
             }
 
             // Clear previous QR code
-            const canvas = document.getElementById("qrcode");
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById("qrcode").innerHTML = "";
 
-            // Generate QR code
-            const qr = qrcode(0, 'L');
+            // Create a new QR Code
+            const qr = qrcode(0, 'L');  
             qr.addData(qrData);
             qr.make();
 
-            // Render QR code on canvas
-            const qrSize = 256; // Size of QR code
-            canvas.width = qrSize;
-            canvas.height = qrSize;
-            const qrImage = new Image();
-            qrImage.onload = () => {
-                ctx.drawImage(qrImage, 0, 0, qrSize, qrSize);
-            };
-            qrImage.src = qr.createDataURL();
+            // Display QR code
+            const qrImage = qr.createImgTag(6, 10);
+            document.getElementById("qrcode").innerHTML = qrImage;
 
             // Enable download option
-            enableDownload(canvas);
+            enableDownload(qr);
         }
 
-        function enableDownload(canvas) {
+        function enableDownload(qr) {
+            const qrDataUrl = qr.createDataURL(6, 10);
             const downloadLink = document.getElementById("downloadLink");
-            downloadLink.href = canvas.toDataURL();
+            downloadLink.href = qrDataUrl;
             downloadLink.download = "qrcode.png";
             downloadLink.innerText = "Download QR Code";
             downloadLink.style.display = "block";
