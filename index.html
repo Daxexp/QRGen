@@ -85,7 +85,7 @@
     </select>
 
     <div id="inputFields">
-        <input type="text" id="qrData" placeholder="Enter text, URL, or emoji">
+        <input type="text" id="qrData" placeholder="Enter text or URL">
     </div>
 
     <button onclick="generateQRCode()">Generate QR Code</button>
@@ -118,7 +118,7 @@
                 `;
             } else {
                 inputFields.innerHTML = `
-                    <input type="text" id="qrData" placeholder="Enter text or URL">
+                    <input type="text" id="qrData" placeholder="Enter text, URL, or emoji">
                 `;
             }
         }
